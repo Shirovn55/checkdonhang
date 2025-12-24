@@ -277,15 +277,25 @@ def _read_items_from_sheet() -> Tuple[List[Dict[str, str]], str]:
     return items, ""
 
 def _search_by_name(q: str) -> List[Dict[str, str]]:
+    """
+    Chỉ match khi nhập ĐÚNG & ĐỦ họ tên (sau normalize)
+    Ví dụ:
+    - Phạm Hùng  -> OK
+    - pham hung  -> OK
+    - hùng       -> KHÔNG OK
+    """
     qn = _norm(q)
     items, _ = _read_items_from_sheet()
 
     out = []
     for it in items:
-        if qn and _norm(it.get("name_key", "")).find(qn) >= 0:
+        name_norm = _norm(it.get("name_key", ""))
+
+        # ✅ so khớp CHUẨN TÊN (exact match)
+        if qn == name_norm:
             out.append(it)
 
-    # ✅ ĐẢO THỨ TỰ HIỂN THỊ: mới nhất lên trước (row lớn hơn = mới hơn)
+    # ✅ mới nhất lên trước
     out.sort(key=lambda x: int(x.get("_row", 0)), reverse=True)
 
     return out[:25]
@@ -302,7 +312,21 @@ INDEX_HTML = r"""
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{banner}}</title>
 
+<link rel="icon" type="image/svg+xml"
+      href="data:image/svg+xml,
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+        <rect width='64' height='64' rx='12' ry='12' fill='white'/>
+        <text x='50%' y='50%'
+              dominant-baseline='middle'
+              text-anchor='middle'
+              font-size='36'
+              font-weight='900'
+              fill='%23EE4D2D'
+              font-family='Arial, Helvetica, sans-serif'>N</text>
+      </svg>">
+
 <style>
+
 :root{
   --orange:#EE4D2D;
   --orange2:#ff5a00;
@@ -311,6 +335,14 @@ INDEX_HTML = r"""
   --text:#111827;
   --muted:#6b7280;
   --border:#e5e7eb;
+}
+.notice-pay{
+  margin-top:10px;
+  font-size:13px;
+  font-style:italic;
+  color:#EE4D2D; /* cam Shopee */
+  text-align:center;
+  font-weight:600;
 }
 
 *{box-sizing:border-box}
@@ -505,6 +537,9 @@ body{
     </div>
     <div id="msg" class="msg"></div>
   </div>
+<div class="notice-pay">
+  👉 Check đơn nếu có <b>Mã Vận Đơn</b> rồi thì vui lòng <b>bank hộ shop</b>!
+</div>
 
   <div id="results" class="results"></div>
 

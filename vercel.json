@@ -3,12 +3,15 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "regions": ["hkg1", "sin1"]
+      }
     }
   ],
   "routes": [
     {
-      "src": "/check/(.*)",
+      "src": "/(.*)",
       "dest": "app.py"
     }
   ]
